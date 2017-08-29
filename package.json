@@ -1,0 +1,41 @@
+{
+  "name": "graphql-aws-iot-ws-transport",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "prebuild": "rm -rf dist && mkdir -p dist",
+    "build": "tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/graphql": "^0.10.2",
+    "@types/node": "^8.0.25",
+    "aws-sdk": "^2.104.0",
+    "rimraf": "^2.6.1",
+    "typescript": "^2.4.2"
+  },
+  "peerDependencies": {
+    "graphql": "0.11.1"
+  },
+  "dependencies": {
+    "backo2": "^1.0.2",
+    "buffer": "^5.0.7",
+    "crypto": "^1.0.1",
+    "domain": "0.0.1",
+    "eventemitter3": "^2.0.3",
+    "graphql": "^0.11.1",
+    "graphql-subscriptions": "^0.4.4",
+    "http": "0.0.0",
+    "iterall": "^1.1.1",
+    "lodash": "^4.17.4",
+    "lodash.assign": "^4.2.0",
+    "lodash.isobject": "^3.0.2",
+    "paho-mqtt": "^1.0.3",
+    "querystring": "^0.2.0",
+    "stream": "0.0.2",
+    "symbol-observable": "^1.0.4",
+    "url": "^0.11.0"
+  }
+}

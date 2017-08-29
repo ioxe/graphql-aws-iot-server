@@ -1,0 +1,22 @@
+{
+  "env": {
+    "node": true,
+    "es6": true
+  },
+  "globals": {
+    "Promise": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "ecmaFeatures": {
+      "es6": true
+    }
+  },
+  "rules": {
+    "semi": 2,
+    "no-undef": 2,
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "comma-dangle": 2,
+    "no-extra-semi": 2
+  }
+}
