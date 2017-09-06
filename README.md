@@ -148,7 +148,7 @@ pubsub.publish('NEW_TODO', { teamTodoAdded: input });
  
   ``` ts
   export interface SubscriptionPrunerOptions {
-    tableName: string;
+    subscriptionsTableName: string;
     clientIdtoSubscriptionsIndex: string;
   }
  ```
