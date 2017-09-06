@@ -7,9 +7,9 @@ import MessageTypes from './message-types';
 export interface SubscriptionPublisherOptions {
     appPrefix: string;
     iotEndpoint: string;
-    tableName: string;
+    subscriptionsTableName: string;
     subscriptionToClientIdsIndex: string;
-    triggerToFilterFunctionsMap: { [key: string]: any }
+    triggerNameToFilterFunctionsMap: { [key: string]: any }
     triggerNameToSubscriptionNamesMap: { [key: string]: any }
     schema: GraphQLSchema;
 }
@@ -21,18 +21,18 @@ export class SubscriptionPublisher {
     schema: GraphQLSchema;
     db: AWS.DynamoDB.DocumentClient;
     subscriptionToClientIdsIndex: string;
-    triggerToFilterFunctionsMap = {};
+    triggerNameToFilterFunctionsMap = {};
     triggerNameToSubscriptionNamesMap = {};
 
     constructor(options: SubscriptionPublisherOptions) {
         this.appPrefix = options.appPrefix;
         this.iotData = new AWS.IotData({ endpoint: options.iotEndpoint });
-        this.tableName = options.tableName;
+        this.tableName = options.subscriptionsTableName;
         this.subscriptionToClientIdsIndex = options.subscriptionToClientIdsIndex;
         this.schema = options.schema;
         this.db = new AWS.DynamoDB.DocumentClient();
-        if (options.triggerToFilterFunctionsMap) {
-            this.triggerToFilterFunctionsMap = options.triggerToFilterFunctionsMap;
+        if (options.triggerNameToFilterFunctionsMap) {
+            this.triggerNameToFilterFunctionsMap = options.triggerNameToFilterFunctionsMap;
         }
         if (!options.triggerNameToSubscriptionNamesMap) {
             throw new Error('Subscription name to triggerNames map is required');
@@ -69,8 +69,8 @@ export class SubscriptionPublisher {
                 console.log(res);
                 if (res.Items && res.Items.length) {
                     res.Items.forEach(item => {
-                        if (this.triggerToFilterFunctionsMap[triggerName]) {
-                            const execute = this.triggerToFilterFunctionsMap[triggerName](payload, item.variableValues);
+                        if (this.triggerNameToFilterFunctionsMap[triggerName]) {
+                            const execute = this.triggerNameToFilterFunctionsMap[triggerName](payload, item.variableValues);
                             if (!execute) return;
                         }
                         promises.push(this.executeQuery(item, payload));

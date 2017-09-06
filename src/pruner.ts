@@ -1,7 +1,7 @@
 import * as AWS from 'aws-sdk';
 
 export interface SubscriptionPrunerOptions {
-    tableName: string;
+    subscriptionsTableName: string;
     clientIdtoSubscriptionsIndex: string;
 }
 
@@ -12,7 +12,7 @@ export class SubscriptionPruner {
     clientIdtoSubscriptionsIndex: string;
     constructor(options: SubscriptionPrunerOptions) {
         this.db = new AWS.DynamoDB.DocumentClient();
-        this.tableName = options.tableName;
+        this.tableName = options.subscriptionsTableName;
         this.clientIdtoSubscriptionsIndex = options.clientIdtoSubscriptionsIndex;
     }
 
