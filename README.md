@@ -7,7 +7,7 @@ Serverless architecture
 
 ## Architecture
 
-1. Graphql API lambda function
+### Graphql API lambda function
   * Uses the Subscription Server class from this ws transport to handled incoming messages from the client.
   * The lambda function can perform any pre execution logic to determine authorization of client based on the clientId. You       are allowed to pass in a custom clientId when instantiating the client. If you are using Cognito for IAM the clientId must     be the identityId (More details in client repo for client flow.)
   * Contains your application specific schema and resolvers for Graphql
@@ -83,7 +83,7 @@ Serverless architecture
   ```
   The server onMessage function returns a promise to let you know that execution has been completed by the lambda.
   
-  2. Subscription Publisher lambda function
+  ### Subscription Publisher lambda function
   * Responsible for publishing messages when triggers are initiated
   
   Subscription Publisher Options
@@ -139,7 +139,7 @@ pubsub.publish('NEW_TODO', { teamTodoAdded: input });
  
  Currently a fanout mechanism needs to be introduced to handle larger numbers of subscriptions.
  
- 3. Subscription Pruner lambda function
+ ### Subscription Pruner lambda function
  * Removes subscriptions for client on aws iot lifecycle disconnect event
  
   ``` ts
