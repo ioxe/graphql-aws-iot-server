@@ -83,6 +83,67 @@ Serverless architecture
   ```
   The server onMessage function returns a promise to let you know that execution has been completed by the lambda.
   
+  ####  Graphql API lambda function instantiation example
+  
+  ``` js
+  import 'source-map-support/register';
+
+import AWS from 'aws-sdk';
+
+import { SubscriptionServer, PubSub } from 'graphql-aws-iot-ws-transport';
+
+import schema from './root.schema';
+
+let documentClient;
+let server;
+let pubsub;
+
+export const handler = (event, context, callback) => {
+    console.log('Todo api handler running');
+    console.log(JSON.stringify(event));
+
+    if (!documentClient) {
+        documentClient = new AWS.DynamoDB.DocumentClient();
+    }
+
+    if (!pubsub) {
+        // class that invokes publisher lambda to trigger a subscription publish has only one method publish
+        pubsub = new PubSub(process.env.SubscriptionPublisherFunctionName);
+    }
+
+    if (!server) {
+        const subscriptionServerOptions = {
+            appPrefix: process.env.AppPrefix,
+            iotEndpoint: process.env.IotEndpoint,
+            schema,
+            subscriptionsTableName: process.env.SubscriptionsTableName
+        };
+        server = new SubscriptionServer(subscriptionServerOptions);
+    }
+
+    const { data, clientId } = event;
+    const parsedMessage = JSON.parse(data);
+
+    const graphqlContext = {
+        documentClient,
+        TableName: process.env.TodosTableName,
+        pubsub
+    };
+
+    server.onMessage(parsedMessage, clientId, graphqlContext)
+        .then(_ => {
+            callback();
+        })
+        .catch(err => {
+            console.log('Todo Api Handler Error');
+            console.log(JSON.stringify(err));
+            callback();
+        });
+};
+```
+See https://github.com/ioxe/graphql-aws-iot-ws-transport-example/tree/master/backend/todo-api/src for full example of an Graphql API lambda function that uses the subscription server 
+  
+  
   ### Subscription Publisher lambda function
   * Responsible for publishing messages when triggers are initiated
   
@@ -141,7 +202,53 @@ pubsub.publish('NEW_TODO', { teamTodoAdded: input });
  
 * Currently a fanout mechanism needs to be introduced to handle larger numbers of subscriptions.
  
- 
+ ####  Subscription Publisher lambda function instantiation example
+ ```js
+ import 'source-map-support/register';
+
+import { SubscriptionPublisher } from 'graphql-aws-iot-ws-transport';
+import schema from '../../todo-api/src/root.schema';
+
+let publisher;
+
+export const handler = (event, context, callback) => {
+    console.log(JSON.stringify(event));
+    const { triggerName, payload } = event;
+
+    const subscriptionPublisherOptions = {
+        appPrefix: process.env.AppPrefix,
+        iotEndpoint: process.env.IotEndpoint,
+        subscriptionsTableName: process.env.SubscriptionsTableName,
+        subscriptionToClientIdsIndex: process.env.SubscriptionToClientIdsIndex,
+        triggerNameToFilterFunctionsMap: {
+            NEW_TODO: (payload, variables) => {
+                return payload.teamTodoAdded.teamName === variables.teamName;
+            }
+        },
+        triggerNameToSubscriptionNamesMap: {
+          NEW_TODO: 'teamTodoAdded'
+        },
+        schema
+    };
+    
+    if (!publisher) {
+        publisher = new SubscriptionPublisher(subscriptionPublisherOptions);
+    }
+    
+    publisher.onEvent(triggerName, payload)
+        .then(res => {
+            console.log(res);
+            callback();
+        })
+        .catch(err => {
+            console.log('Publisher error');
+            console.log(err);
+            callback();
+        });
+};
+```
+See https://github.com/ioxe/graphql-aws-iot-ws-transport-example/tree/master/backend/todo-subscription-publisher/src for full example of an Graphql API lambda function that uses the subscription publisher
+
  ### Subscription Pruner lambda function
  
  * Removes subscriptions for client on aws iot lifecycle disconnect event
@@ -154,7 +261,44 @@ pubsub.publish('NEW_TODO', { teamTodoAdded: input });
  ```
  Instantiate the class and use the onEvent method passing in the clientId. The clientId is present as a property of the event object. 
  
- ## Example
+####  Subscription Publisher lambda function instantiation example
+``` js
+import 'source-map-support/register';
+
+import 'aws-sdk';
+
+import { SubscriptionPruner } from 'graphql-aws-iot-ws-transport';
+
+// Currently only subscribed to the AWS IoT disconnected lifecycle event
+
+let subscriptionPruner;
+export const handler = (event, context, callback) => {
+    console.log(JSON.stringify(event));
+    const { clientId } = event;
+
+    if (!subscriptionPruner) {
+        const subscriptionPrunerOptions = {
+            subscriptionsTableName: process.env.SubscriptionsTableName,
+            clientIdtoSubscriptionsIndex: process.env.ClientIdToSubscriptionsIndex
+        };
+        subscriptionPruner = new SubscriptionPruner(subscriptionPrunerOptions);
+    }
+
+    subscriptionPruner.onEvent(clientId).
+        then(_ => {
+            callback();
+        })
+        .catch(err => {
+            console.log('Pruner error');
+            console.log(err);
+            callback();
+        });
+
+};
+```
+See https://github.com/ioxe/graphql-aws-iot-ws-transport-example/tree/master/backend/todo-subscription-pruner/src for full example of an Graphql API lambda function that uses the subscription publisher 
+ 
+ ## Full Example
 * See full example of a todo app at https://github.com/ioxe/graphql-aws-iot-ws-transport-example. 
 * See cloudformation stack for full infrastructure configuration for example app (https://github.com/ioxe/graphql-aws-iot-ws-transport-example/blob/master/backend/todo-backend.yaml)
  
