@@ -123,23 +123,27 @@ pubsub.publish('NEW_TODO', { teamTodoAdded: input });
  ```
  * Example of triggerNameToSubscriptionNamesMap object
 
- ```js
+ ``` js
   triggerNameToSubscriptionNamesMap: {
      NEW_TODO: 'teamTodoAdded'
-  },
+  }
  ```
 * Note for the subscriptions map object there can be multiple subscriptions executed by the same triggerName so you can also pass in an array like below 
   
-   ```js
+ ``` js
   triggerNameToSubscriptionNamesMap: {
      NEW_TODO: ['teamTodoAdded', 'teamUpdated']
-  },
- ```
+  }
+```
+ 
+ 
 * The publisher function will then publish messages to the relevant clients.
  
- Currently a fanout mechanism needs to be introduced to handle larger numbers of subscriptions.
+* Currently a fanout mechanism needs to be introduced to handle larger numbers of subscriptions.
+ 
  
  ### Subscription Pruner lambda function
+ 
  * Removes subscriptions for client on aws iot lifecycle disconnect event
  
   ``` ts
