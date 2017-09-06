@@ -155,7 +155,8 @@ pubsub.publish('NEW_TODO', { teamTodoAdded: input });
  Instantiate the class and use the onEvent method passing in the clientId. The clientId is present as a property of the event object. 
  
  ## Example
- See full example of a todo app at https://github.com/ioxe/graphql-aws-iot-ws-transport-example. In the example in backend/todobackend.yaml you can see the cloudformation script which automates the permissioning and table creation required for this transport.
+* See full example of a todo app at https://github.com/ioxe/graphql-aws-iot-ws-transport-example. 
+* See cloudformation stack for full infrastructure configuration for example app (https://github.com/ioxe/graphql-aws-iot-ws-transport-example/blob/master/backend/todo-backend.yaml)
  
 
 
