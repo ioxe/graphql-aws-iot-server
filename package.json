@@ -1,6 +1,6 @@
 {
   "name": "graphql-aws-iot-ws-transport",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Serverless graphql transport for graphql queries mutations and subascriptions",
   "author": "Girish Nanda <girish@ioxengineering.com>",
   "main": "dist/index.js",
