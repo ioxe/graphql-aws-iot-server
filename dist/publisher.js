@@ -6,7 +6,7 @@ var message_types_1 = require("./message-types");
 var SubscriptionPublisher = /** @class */ (function () {
     function SubscriptionPublisher(options) {
         var _this = this;
-        this.triggerToFilterFunctionsMap = {};
+        this.triggerNameToFilterFunctionsMap = {};
         this.triggerNameToSubscriptionNamesMap = {};
         // For each payload yielded from a subscription, map it over the normal
         // GraphQL `execute` function, with `payload` as the rootValue.
@@ -31,12 +31,12 @@ var SubscriptionPublisher = /** @class */ (function () {
         };
         this.appPrefix = options.appPrefix;
         this.iotData = new AWS.IotData({ endpoint: options.iotEndpoint });
-        this.tableName = options.tableName;
+        this.tableName = options.subscriptionsTableName;
         this.subscriptionToClientIdsIndex = options.subscriptionToClientIdsIndex;
         this.schema = options.schema;
         this.db = new AWS.DynamoDB.DocumentClient();
-        if (options.triggerToFilterFunctionsMap) {
-            this.triggerToFilterFunctionsMap = options.triggerToFilterFunctionsMap;
+        if (options.triggerNameToFilterFunctionsMap) {
+            this.triggerNameToFilterFunctionsMap = options.triggerNameToFilterFunctionsMap;
         }
         if (!options.triggerNameToSubscriptionNamesMap) {
             throw new Error('Subscription name to triggerNames map is required');
@@ -72,8 +72,8 @@ var SubscriptionPublisher = /** @class */ (function () {
             console.log(res);
             if (res.Items && res.Items.length) {
                 res.Items.forEach(function (item) {
-                    if (_this.triggerToFilterFunctionsMap[triggerName]) {
-                        var execute_1 = _this.triggerToFilterFunctionsMap[triggerName](payload, item.variableValues);
+                    if (_this.triggerNameToFilterFunctionsMap[triggerName]) {
+                        var execute_1 = _this.triggerNameToFilterFunctionsMap[triggerName](payload, item.variableValues);
                         if (!execute_1)
                             return;
                     }

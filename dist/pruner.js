@@ -4,7 +4,7 @@ var AWS = require("aws-sdk");
 var SubscriptionPruner = /** @class */ (function () {
     function SubscriptionPruner(options) {
         this.db = new AWS.DynamoDB.DocumentClient();
-        this.tableName = options.tableName;
+        this.tableName = options.subscriptionsTableName;
         this.clientIdtoSubscriptionsIndex = options.clientIdtoSubscriptionsIndex;
     }
     SubscriptionPruner.prototype.onEvent = function (clientId) {
