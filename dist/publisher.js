@@ -20,9 +20,7 @@ var SubscriptionPublisher = /** @class */ (function () {
             var contextValue = {};
             var document = typeof query !== 'string' ? query : graphql_1.parse(query);
             return graphql_1.execute(_this.schema, document, payload, contextValue, variableValues, operationName).then(function (payload) {
-                console.log('execution result');
-                console.log(payload);
-                _this.sendMessage(clientId, subscriptionId, message_types_1.default.GQL_DATA, payload);
+                return _this.sendMessage(clientId, subscriptionId, message_types_1.default.GQL_DATA, payload);
             })
                 .catch(function (err) {
                 console.log('Error executing payload');
@@ -84,8 +82,6 @@ var SubscriptionPublisher = /** @class */ (function () {
                 promises.push(Promise.resolve(null));
             }
             return Promise.all(promises).then(function (res) {
-                console.log('execution results');
-                console.log(res);
                 return res;
             });
         });

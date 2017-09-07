@@ -80,8 +80,6 @@ export class SubscriptionPublisher {
                     promises.push(Promise.resolve(null));
                 }
                 return Promise.all(promises).then(res => {
-                    console.log('execution results');
-                    console.log(res);
                     return res;
                 });
             });
@@ -109,9 +107,7 @@ export class SubscriptionPublisher {
             variableValues,
             operationName
         ).then(payload => {
-            console.log('execution result');
-            console.log(payload);
-            this.sendMessage(clientId, subscriptionId, MessageTypes.GQL_DATA, payload);
+            return this.sendMessage(clientId, subscriptionId, MessageTypes.GQL_DATA, payload);
         })
             .catch(err => {
                 console.log('Error executing payload');
