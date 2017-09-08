@@ -27,6 +27,7 @@ var SubscriptionPublisher = /** @class */ (function () {
         };
         this.appPrefix = options.appPrefix;
         this.iotData = new AWS.IotData({ endpoint: options.iotEndpoint });
+        this.schema = options.schema;
     }
     SubscriptionPublisher.prototype.sendMessage = function (clientId, opId, type, payload) {
         var _this = this;

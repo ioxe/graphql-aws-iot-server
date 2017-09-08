@@ -51,14 +51,14 @@ var SubscriptionServer = /** @class */ (function () {
                 else if (is_subscriptions_1.isASubscriptionOperation(document_1, params_1.operationName)) {
                     return this.validateSubscription(this.schema, document_1, this.rootValue, params_1.context, params_1.variables, params_1.operationName)
                         .then(function (subscriptionName) {
-                        var setSubscriptionParams = {
+                        var addSubscriptionParams = {
                             clientId: clientId,
                             query: params_1.query,
                             subscriptionName: subscriptionName,
                             subscriptionId: opId,
                             variableValues: params_1.variables
                         };
-                        return _this.addSubscriptionFunction(setSubscriptionParams);
+                        return _this.addSubscriptionFunction(addSubscriptionParams);
                     });
                 }
                 else {

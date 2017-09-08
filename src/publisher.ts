@@ -18,6 +18,7 @@ export class SubscriptionPublisher {
     constructor(options: SubscriptionPublisherOptions) {
         this.appPrefix = options.appPrefix;
         this.iotData = new AWS.IotData({ endpoint: options.iotEndpoint });
+        this.schema = options.schema;
     }
 
     // For each payload yielded from a subscription, map it over the normal

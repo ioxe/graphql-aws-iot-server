@@ -83,7 +83,7 @@ export interface RemoveSubscriptionParams {
     subscriptionName: string,
 }
 
-export type RemoveSubscriptionFunction = (params: RemoveSubscriptionParams) => Promise<Subscription>
+export type RemoveSubscriptionFunction = (params: RemoveSubscriptionParams) => Promise<void>
 
 export class SubscriptionServer {
     private appPrefix; // namespace for app topics    
@@ -155,14 +155,14 @@ export class SubscriptionServer {
                         params.variables,
                         params.operationName)
                         .then(subscriptionName => {
-                            const setSubscriptionParams: Subscription = {
+                            const addSubscriptionParams: Subscription = {
                                 clientId,
                                 query: params.query,
                                 subscriptionName,
                                 subscriptionId: opId,
                                 variableValues: params.variables
                             }
-                            return this.addSubscriptionFunction(setSubscriptionParams);
+                            return this.addSubscriptionFunction(addSubscriptionParams);
                         })
                 } else {
                     return this.execute(
