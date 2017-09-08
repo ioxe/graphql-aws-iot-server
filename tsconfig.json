@@ -18,6 +18,9 @@
         "dom",
         "esnext.asynciterable"
       ]
-    }
+    },
+    "exclude": [
+      "tests/**/*"
+    ]
   }
   
