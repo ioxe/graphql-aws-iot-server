@@ -21,6 +21,7 @@ var SubscriptionPublisher = /** @class */ (function () {
                 subscriptionsGroupedByIdenticalExecution.forEach(function (group) {
                     promises_1.push(_this.executeSubscription(group[0], payload)
                         .then(function (executionResult) {
+                            console.log(executionResult);
                         var sendMessagePromises = [];
                         group.forEach(function (subscription) {
                             var clientId = subscription.clientId, subscriptionId = subscription.subscriptionId;

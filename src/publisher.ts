@@ -41,6 +41,10 @@ export class SubscriptionPublisher {
 
 
     public executeQueriesAndSendMessages = (subscriptions: Subscription[] | Subscription, payload) => {
+        if (!payload) {
+            console.log('throwing');
+            throw new Error('Payload required');
+        }
         // execute an array of queries batching by identical execution
         if (Object.prototype.toString.call(subscriptions) === '[object Array]') {
             let promises = [];

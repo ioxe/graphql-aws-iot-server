@@ -119,18 +119,14 @@ describe('Execution', () => {
         }
 
         const executeSpy = jest.spyOn(subscriptionPublisher, 'executeSubscription');
-        
+
 
         subscriptionPublisher.executeQueriesAndSendMessages(subscriptions, payload)
             .then(res => {
                 expect(subscriptionPublisher.iotData.messages).toEqual(expectedIoTDataParamsArray);
                 expect(executeSpy).toHaveBeenCalledTimes(1);
                 done();
-            })
-            .catch(err => {
-                console.log(err);
-                done();
-            })
+            });
     })
 
     it('successfully batches and executes an array of mixed (identical + different) client subscriptions', done => {
@@ -185,17 +181,31 @@ describe('Execution', () => {
         }
 
         const executeSpy = jest.spyOn(subscriptionPublisher, 'executeSubscription');
-        
+
 
         subscriptionPublisher.executeQueriesAndSendMessages(subscriptions, payload)
             .then(res => {
                 expect(subscriptionPublisher.iotData.messages).toEqual(expectedIoTDataParamsArray);
                 expect(executeSpy).toHaveBeenCalledTimes(2);
                 done();
-            })
-            .catch(err => {
-                console.log(err);
-                done();
-            })
+            });
+    })
+
+    it('should error if payload is not given to executeQueriesAndSendMessages function', async () => {
+        const subscriptions = [
+            {
+                "clientId": "1",
+                "query": "subscription TodoAdded  { todoAdded { id   content\n  __typename\n  }\n}\n",
+                "subscriptionId": "2",
+                "subscriptionName": "todoAdded",
+                "variableValues": {}
+            }
+        ]
+
+        try {
+            await subscriptionPublisher.executeQueriesAndSendMessages(subscriptions, null);
+        } catch (e) {
+            expect(e.message).toMatch('Payload required');
+        }
     })
 });
