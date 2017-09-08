@@ -6,11 +6,23 @@ var graphql_1 = require("graphql");
 var execution = require('graphql/execution/execute');
 var addPath = execution.addPath, assertValidExecutionArguments = execution.assertValidExecutionArguments, buildExecutionContext = execution.buildExecutionContext, buildResolveInfo = execution.buildResolveInfo, getOperationRootType = execution.getOperationRootType, collectFields = execution.collectFields, getFieldDef = execution.getFieldDef, resolveFieldValueOrError = execution.resolveFieldValueOrError;
 var is_subscriptions_1 = require("./utils/is-subscriptions");
-var SubscriptionServer = /** @class */ (function () {
-    function SubscriptionServer(options) {
+var SubscriptionManager = /** @class */ (function () {
+    function SubscriptionManager(options) {
         var keepAlive = options.keepAlive;
+        if (!options.iotEndpoint) {
+            throw new Error('Iot Endpoint Required');
+        }
         if (!options.schema) {
-            throw new Error('schema required');
+            throw new Error('Schema Required');
+        }
+        if (!options.appPrefix) {
+            throw new Error('AppPrefix required');
+        }
+        if (!options.addSubscriptionFunction) {
+            throw new Error('Add Subscription Function Required');
+        }
+        if (!options.removeSubscriptionFunction) {
+            throw new Error('Remove Subscription Function Required');
         }
         this.appPrefix = options.appPrefix;
         this.schema = options.schema;
@@ -21,10 +33,10 @@ var SubscriptionServer = /** @class */ (function () {
         this.removeSubscriptionFunction = options.removeSubscriptionFunction;
     }
     // unsubscribe using clientId and subscriptionName rather than opId to avoid creating an extra index. 
-    SubscriptionServer.prototype.unsubscribe = function (clientId, subscriptionName) {
+    SubscriptionManager.prototype.unsubscribe = function (clientId, subscriptionName) {
         return this.removeSubscriptionFunction({ clientId: clientId, subscriptionName: subscriptionName });
     };
-    SubscriptionServer.prototype.onMessage = function (parsedMessage, clientId, context) {
+    SubscriptionManager.prototype.onMessage = function (parsedMessage, clientId, context) {
         var _this = this;
         var opId = parsedMessage.id;
         console.log('received message');
@@ -99,7 +111,7 @@ var SubscriptionServer = /** @class */ (function () {
                 return this.sendError(clientId, opId, { message: 'Invalid message type!' });
         }
     };
-    SubscriptionServer.prototype.validateSubscription = function (schema, document, rootValue, contextValue, variableValues, operationName, fieldResolver) {
+    SubscriptionManager.prototype.validateSubscription = function (schema, document, rootValue, contextValue, variableValues, operationName, fieldResolver) {
         var assert = assertValidExecutionArguments(schema, document, variableValues);
         var exeContext = buildExecutionContext(schema, document, rootValue, contextValue, variableValues, operationName, fieldResolver);
         var type = getOperationRootType(schema, exeContext.operation);
@@ -114,12 +126,12 @@ var SubscriptionServer = /** @class */ (function () {
     };
     // Same function as in graphql package
     // Used as part of validate subscription function
-    SubscriptionServer.prototype.invariant = function (condition, message) {
+    SubscriptionManager.prototype.invariant = function (condition, message) {
         if (!condition) {
             throw new Error(message);
         }
     };
-    SubscriptionServer.prototype.sendMessage = function (clientId, opId, type, payload) {
+    SubscriptionManager.prototype.sendMessage = function (clientId, opId, type, payload) {
         var message = {
             type: type,
             id: opId,
@@ -130,12 +142,11 @@ var SubscriptionServer = /** @class */ (function () {
             payload: JSON.stringify(message),
             qos: 0
         };
-        console.log('Send message params', params);
         if (message && clientId) {
             return this.iotData.publish(params).promise();
         }
     };
-    SubscriptionServer.prototype.sendError = function (clientId, opId, errorPayload, overrideDefaultErrorType) {
+    SubscriptionManager.prototype.sendError = function (clientId, opId, errorPayload, overrideDefaultErrorType) {
         var sanitizedOverrideDefaultErrorType = overrideDefaultErrorType || message_types_1.default.GQL_ERROR;
         if ([
             message_types_1.default.GQL_CONNECTION_ERROR,
@@ -146,7 +157,7 @@ var SubscriptionServer = /** @class */ (function () {
         }
         return this.sendMessage(clientId, opId, sanitizedOverrideDefaultErrorType, errorPayload);
     };
-    return SubscriptionServer;
+    return SubscriptionManager;
 }());
-exports.SubscriptionServer = SubscriptionServer;
-//# sourceMappingURL=server.js.map
+exports.SubscriptionManager = SubscriptionManager;
+//# sourceMappingURL=manager.js.map

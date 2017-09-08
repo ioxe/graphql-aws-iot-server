@@ -38,7 +38,6 @@ export interface OperationMessagePayload {
 
 export interface OperationMessage {
     payload?: OperationMessagePayload;
-    variables: any;
     id?: string;
     type: string;
 }
@@ -50,7 +49,7 @@ export type ExecuteFunction = (schema: GraphQLSchema,
     variableValues?: { [key: string]: any },
     operationName?: string) => Promise<ExecutionResult>;
 
-export interface ServerOptions {
+export interface ManagerOptions {
     appPrefix: string; // app namespace for aws iot
     addSubscriptionFunction: AddSubscriptionFunction // Saves subscription information to desired db. Should return promise. - used in the case of a new subscription being registered
     removeSubscriptionFunction: RemoveSubscriptionFunction // Gets subscription infomration - used in the case of unsubscribe
@@ -65,18 +64,11 @@ export interface Subscription {
     query: string;
     subscriptionName: string;
     subscriptionId: string;
-    variableValues: string;
+    variableValues: { [key: string]: any };
 }
 
-export interface AddSubscriptionParams {
-    clientId: string;
-    query: string,
-    subscriptionName: string,
-    subscriptionId: string,
-    variableValues: string
-}
 
-export type AddSubscriptionFunction = (params: AddSubscriptionParams) => Promise<void>
+export type AddSubscriptionFunction = (params: Subscription) => Promise<any>
 
 export interface RemoveSubscriptionParams {
     clientId: string;
@@ -85,7 +77,7 @@ export interface RemoveSubscriptionParams {
 
 export type RemoveSubscriptionFunction = (params: RemoveSubscriptionParams) => Promise<void>
 
-export class SubscriptionServer {
+export class SubscriptionManager {
     private appPrefix; // namespace for app topics    
     private execute: ExecuteFunction;
     private schema: GraphQLSchema;
@@ -96,13 +88,29 @@ export class SubscriptionServer {
     private addSubscriptionFunction: AddSubscriptionFunction;
     private removeSubscriptionFunction: RemoveSubscriptionFunction;
 
-    constructor(options: ServerOptions) {
+    constructor(options: ManagerOptions) {
         const {
             keepAlive,
           } = options;
 
+        if (!options.iotEndpoint) {
+            throw new Error('Iot Endpoint Required')
+        }
+
         if (!options.schema) {
-            throw new Error('schema required');
+            throw new Error('Schema Required');
+        }
+
+        if (!options.appPrefix) {
+            throw new Error('AppPrefix required');
+        }
+
+        if (!options.addSubscriptionFunction) {
+            throw new Error('Add Subscription Function Required')
+        }
+
+        if (!options.removeSubscriptionFunction) {
+            throw new Error('Remove Subscription Function Required');
         }
         this.appPrefix = options.appPrefix;
         this.schema = options.schema;
@@ -118,7 +126,7 @@ export class SubscriptionServer {
         return this.removeSubscriptionFunction({ clientId, subscriptionName });
     }
 
-    public onMessage(parsedMessage: OperationMessage, clientId: string, context) {
+    public onMessage(parsedMessage: OperationMessage, clientId: string, context): Promise<any> {
         const opId = parsedMessage.id;
         console.log('received message');
         console.log(JSON.stringify(parsedMessage));
@@ -202,7 +210,7 @@ export class SubscriptionServer {
             case MessageTypes.GQL_STOP:
                 console.log('stop payload');
                 console.log(parsedMessage);
-                return this.unsubscribe(clientId, parsedMessage.payload.subscriptionName)
+                return this.unsubscribe(clientId, parsedMessage.payload.subscriptionName);
             default:
                 return this.sendError(clientId, opId, { message: 'Invalid message type!' });
         }
@@ -258,7 +266,7 @@ export class SubscriptionServer {
         }
     }
 
-    private sendMessage(clientId: string, opId: string, type: string, payload: any): void {
+    private sendMessage(clientId: string, opId: string, type: string, payload: any): Promise<any> {
         const message = {
             type,
             id: opId,
@@ -271,15 +279,13 @@ export class SubscriptionServer {
             qos: 0
         };
 
-        console.log('Send message params', params);
-
         if (message && clientId) {
             return this.iotData.publish(params).promise();
         }
     }
 
     private sendError(clientId: string, opId: string, errorPayload: any,
-        overrideDefaultErrorType?: string): void {
+        overrideDefaultErrorType?: string): Promise<any> {
         const sanitizedOverrideDefaultErrorType = overrideDefaultErrorType || MessageTypes.GQL_ERROR;
         if ([
             MessageTypes.GQL_CONNECTION_ERROR,

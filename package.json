@@ -6,16 +6,37 @@
   "main": "dist/index.js",
   "scripts": {
     "prebuild": "rm -rf dist && mkdir -p dist",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "jest",
+    "test:publisher": "jest tests/publisher.test.ts --watch",    
+    "test:manager": "jest tests/publisher.test.ts --watch",    
+    "test:coverage": "jest --coverage",
+    "test:dev": "jest --watch"
   },
   "license": "MIT",
   "devDependencies": {
     "@types/graphql": "^0.10.2",
+    "@types/jest": "^20.0.8",
     "@types/node": "^8.0.25",
     "aws-sdk": "^2.107.0",
+    "graphql": "0.11.2",
+    "jest": "^21.0.1",
     "typescript": "^2.4.2"
   },
   "peerDependencies": {
     "graphql": "0.11.2"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "<rootDir>/preprocessor.js"
+    },
+    "testMatch": [
+      "**/tests/*.test.(ts|tsx|js)"
+    ]
   }
 }

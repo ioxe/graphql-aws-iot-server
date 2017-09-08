@@ -1,8 +1,7 @@
 import * as AWS from 'aws-sdk';
 import { execute, parse, GraphQLSchema } from 'graphql';
+import { Subscription } from '../src/manager';
 import MessageTypes from './message-types';
-
-// TODO incorporate fanout logic 
 
 export interface SubscriptionPublisherOptions {
     appPrefix: string;
@@ -16,6 +15,17 @@ export class SubscriptionPublisher {
     schema: GraphQLSchema;
 
     constructor(options: SubscriptionPublisherOptions) {
+        if (!options.iotEndpoint) {
+            throw new Error('Iot Endpoint Required')
+        }
+
+        if (!options.schema) {
+            throw new Error('Schema Required');
+        }
+
+        if (!options.appPrefix) {
+            throw new Error('AppPrefix required');
+        }
         this.appPrefix = options.appPrefix;
         this.iotData = new AWS.IotData({ endpoint: options.iotEndpoint });
         this.schema = options.schema;
@@ -29,25 +39,39 @@ export class SubscriptionPublisher {
     // "ExecuteQuery" algorithm, for which `execute` is also used.
     // Comment Source: https://github.com/graphql/graphql-js/blob/master/src/subscription/subscribe.js
 
-    public executeQueryAndSendMessage = (item, payload) => {
-        const { clientId, subscriptionName, subscriptionId, variableValues, operationName, query } = item;
-        const contextValue = {};
-        const document = typeof query !== 'string' ? query : parse(query);
 
-        return execute(
-            this.schema,
-            document,
-            payload,
-            contextValue,
-            variableValues,
-            operationName
-        ).then(payload => {
-            return this.sendMessage(clientId, subscriptionId, MessageTypes.GQL_DATA, payload);
-        })
-            .catch(err => {
-                console.log('Error executing payload');
-                console.log(JSON.stringify(err));
+    public executeQueriesAndSendMessages = (subscriptions: Subscription[] | Subscription, payload) => {
+        // execute an array of queries batching by identical execution
+        if (Object.prototype.toString.call(subscriptions) === '[object Array]') {
+            let promises = [];
+            let subscriptionsGroupedByIdenticalExecution = this.groupByIdenticalExecutions(subscriptions);
+            subscriptionsGroupedByIdenticalExecution.forEach(group => {
+                promises.push(
+                    this.executeSubscription(group[0], payload)
+                        .then(executionResult => {
+                            let sendMessagePromises = [];
+                            group.forEach(subscription => {
+                                const { clientId, subscriptionId } = subscription;
+                                sendMessagePromises.push(this.sendMessage(clientId, subscriptionId, MessageTypes.GQL_DATA, executionResult));
+                            });
+                            return Promise.all(sendMessagePromises);
+                        })
+                )
             })
+            return Promise.all(promises);
+        } else {
+            // execute only one query
+            return this.executeSubscription(subscriptions as Subscription, payload).then(executionResult => {
+                const { clientId, subscriptionId } = subscriptions as Subscription;
+                return this.sendMessage(clientId, subscriptionId, MessageTypes.GQL_DATA, payload);
+            });
+        }
+    }
+
+    private groupByIdenticalExecutions(subscriptions) {
+        return this.groupBy(subscriptions, (subscription) => {
+            return [subscription.subscriptionName, subscription.variableValues, subscription.query];
+        });
     }
 
     private sendMessage(clientId: string, opId: string, type: string, payload: any): Promise<any> {
@@ -63,13 +87,32 @@ export class SubscriptionPublisher {
             qos: 0
         };
 
-        return new Promise((resolve, reject) => {
-            this.iotData.publish(params, (err, data) => {
-                if (err) {
-                    reject(err);
-                }
-                resolve(data);
-            });
-        });
+        return this.iotData.publish(params).promise();
     }
+
+    private executeSubscription(subscription: Subscription, payload: any) {
+        const { clientId, subscriptionName, variableValues, query } = subscription;
+        const contextValue = {};
+        const document = typeof query !== 'string' ? query : parse(query);
+        return execute(
+            this.schema,
+            document,
+            payload,
+            contextValue,
+            variableValues
+        );
+    }
+
+    private groupBy(array, f) {
+        var groups = {};
+        array.forEach(function (o) {
+            var group = JSON.stringify(f(o));
+            groups[group] = groups[group] || [];
+            groups[group].push(o);
+        });
+        return Object.keys(groups).map(function (group) {
+            return groups[group];
+        })
+    }
+
 }
