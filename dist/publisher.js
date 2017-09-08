@@ -14,6 +14,10 @@ var SubscriptionPublisher = /** @class */ (function () {
         // "ExecuteQuery" algorithm, for which `execute` is also used.
         // Comment Source: https://github.com/graphql/graphql-js/blob/master/src/subscription/subscribe.js
         this.executeQueriesAndSendMessages = function (subscriptions, payload) {
+            if (!payload) {
+                console.log('throwing');
+                throw new Error('Payload required');
+            }
             // execute an array of queries batching by identical execution
             if (Object.prototype.toString.call(subscriptions) === '[object Array]') {
                 var promises_1 = [];
@@ -21,7 +25,6 @@ var SubscriptionPublisher = /** @class */ (function () {
                 subscriptionsGroupedByIdenticalExecution.forEach(function (group) {
                     promises_1.push(_this.executeSubscription(group[0], payload)
                         .then(function (executionResult) {
-                            console.log(executionResult);
                         var sendMessagePromises = [];
                         group.forEach(function (subscription) {
                             var clientId = subscription.clientId, subscriptionId = subscription.subscriptionId;
