@@ -56,7 +56,6 @@ export interface ServerOptions {
     removeSubscriptionFunction: RemoveSubscriptionFunction // Gets subscription infomration - used in the case of unsubscribe
     // rootValue?: any;
     schema: any;
-    subscriptionsTableName: string;
     iotEndpoint: string; // iot endpoint for region (i.e. aws iot describe-endpoint --region us-west-2)
     keepAlive?: number; // TODO implications of package with keep alive param    
 }
@@ -104,9 +103,6 @@ export class SubscriptionServer {
 
         if (!options.schema) {
             throw new Error('schema required');
-        }
-        if (!options.subscriptionsTableName) {
-            throw new Error('subscriptions state tablename required');
         }
         this.appPrefix = options.appPrefix;
         this.schema = options.schema;

@@ -12,9 +12,6 @@ var SubscriptionServer = /** @class */ (function () {
         if (!options.schema) {
             throw new Error('schema required');
         }
-        if (!options.subscriptionsTableName) {
-            throw new Error('subscriptions state tablename required');
-        }
         this.appPrefix = options.appPrefix;
         this.schema = options.schema;
         this.keepAlive = keepAlive;
