@@ -17,22 +17,15 @@ var SubscriptionServer = /** @class */ (function () {
         }
         this.appPrefix = options.appPrefix;
         this.schema = options.schema;
-        this.subscriptionsTableName = options.subscriptionsTableName;
         this.keepAlive = keepAlive;
         this.execute = graphql_1.execute;
         this.iotData = new AWS.IotData({ endpoint: options.iotEndpoint });
-        this.db = new AWS.DynamoDB.DocumentClient();
+        this.addSubscriptionFunction = options.addSubscriptionFunction;
+        this.removeSubscriptionFunction = options.removeSubscriptionFunction;
     }
     // unsubscribe using clientId and subscriptionName rather than opId to avoid creating an extra index. 
     SubscriptionServer.prototype.unsubscribe = function (clientId, subscriptionName) {
-        var params = {
-            TableName: this.subscriptionsTableName,
-            Key: {
-                clientId: clientId,
-                subscriptionName: subscriptionName
-            }
-        };
-        return this.db.delete(params).promise();
+        return this.removeSubscriptionFunction({ clientId: clientId, subscriptionName: subscriptionName });
     };
     SubscriptionServer.prototype.onMessage = function (parsedMessage, clientId, context) {
         var _this = this;
@@ -61,22 +54,14 @@ var SubscriptionServer = /** @class */ (function () {
                 else if (is_subscriptions_1.isASubscriptionOperation(document_1, params_1.operationName)) {
                     return this.validateSubscription(this.schema, document_1, this.rootValue, params_1.context, params_1.variables, params_1.operationName)
                         .then(function (subscriptionName) {
-                        // save item in db
-                        var putParams = {
-                            TableName: _this.subscriptionsTableName,
-                            Item: {
-                                clientId: clientId,
-                                query: params_1.query,
-                                subscriptionName: subscriptionName,
-                                subscriptionId: opId,
-                                variableValues: params_1.variables,
-                                operationName: params_1.operationName
-                            }
+                        var setSubscriptionParams = {
+                            clientId: clientId,
+                            query: params_1.query,
+                            subscriptionName: subscriptionName,
+                            subscriptionId: opId,
+                            variableValues: params_1.variables
                         };
-                        return _this.db.put(putParams).promise().then(function (res) {
-                            console.log('put res');
-                            console.log(res);
-                        });
+                        return _this.addSubscriptionFunction(setSubscriptionParams);
                     });
                 }
                 else {
@@ -94,7 +79,7 @@ var SubscriptionServer = /** @class */ (function () {
                         return _this.sendMessage(clientId, opId, message_types_1.default.GQL_DATA, result);
                     })
                         .then(function (_) {
-                        _this.sendMessage(clientId, opId, message_types_1.default.GQL_COMPLETE, null);
+                        return _this.sendMessage(clientId, opId, message_types_1.default.GQL_COMPLETE, null);
                     })
                         .catch(function (err) {
                         if (params_1.formatError) {

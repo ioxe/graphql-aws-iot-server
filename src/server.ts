@@ -52,12 +52,39 @@ export type ExecuteFunction = (schema: GraphQLSchema,
 
 export interface ServerOptions {
     appPrefix: string; // app namespace for aws iot
+    addSubscriptionFunction: AddSubscriptionFunction // Saves subscription information to desired db. Should return promise. - used in the case of a new subscription being registered
+    removeSubscriptionFunction: RemoveSubscriptionFunction // Gets subscription infomration - used in the case of unsubscribe
     // rootValue?: any;
     schema: any;
     subscriptionsTableName: string;
     iotEndpoint: string; // iot endpoint for region (i.e. aws iot describe-endpoint --region us-west-2)
     keepAlive?: number; // TODO implications of package with keep alive param    
 }
+
+export interface Subscription {
+    clientId: string;
+    query: string;
+    subscriptionName: string;
+    subscriptionId: string;
+    variableValues: string;
+}
+
+export interface AddSubscriptionParams {
+    clientId: string;
+    query: string,
+    subscriptionName: string,
+    subscriptionId: string,
+    variableValues: string
+}
+
+export type AddSubscriptionFunction = (params: AddSubscriptionParams) => Promise<void>
+
+export interface RemoveSubscriptionParams {
+    clientId: string;
+    subscriptionName: string,
+}
+
+export type RemoveSubscriptionFunction = (params: RemoveSubscriptionParams) => Promise<Subscription>
 
 export class SubscriptionServer {
     private appPrefix; // namespace for app topics    
@@ -67,8 +94,8 @@ export class SubscriptionServer {
     private keepAlive: number;
     private specifiedRules: Array<(context: ValidationContext) => any>;
     private iotData; // iot client
-    private db: AWS.DynamoDB.DocumentClient;
-    private subscriptionsTableName: string; // dynamodb table name for subscriptions
+    private addSubscriptionFunction: AddSubscriptionFunction;
+    private removeSubscriptionFunction: RemoveSubscriptionFunction;
 
     constructor(options: ServerOptions) {
         const {
@@ -83,23 +110,16 @@ export class SubscriptionServer {
         }
         this.appPrefix = options.appPrefix;
         this.schema = options.schema;
-        this.subscriptionsTableName = options.subscriptionsTableName;
         this.keepAlive = keepAlive;
         this.execute = execute;
         this.iotData = new AWS.IotData({ endpoint: options.iotEndpoint });
-        this.db = new AWS.DynamoDB.DocumentClient();
+        this.addSubscriptionFunction = options.addSubscriptionFunction;
+        this.removeSubscriptionFunction = options.removeSubscriptionFunction;
     }
 
     // unsubscribe using clientId and subscriptionName rather than opId to avoid creating an extra index. 
     private unsubscribe(clientId: string, subscriptionName: string) {
-        const params = {
-            TableName: this.subscriptionsTableName,
-            Key: {
-                clientId,
-                subscriptionName: subscriptionName
-            }
-        }
-        return this.db.delete(params).promise();
+        return this.removeSubscriptionFunction({ clientId, subscriptionName });
     }
 
     public onMessage(parsedMessage: OperationMessage, clientId: string, context) {
@@ -139,22 +159,14 @@ export class SubscriptionServer {
                         params.variables,
                         params.operationName)
                         .then(subscriptionName => {
-                            // save item in db
-                            const putParams: AWS.DynamoDB.DocumentClient.PutItemInput = {
-                                TableName: this.subscriptionsTableName,
-                                Item: {
-                                    clientId,
-                                    query: params.query,
-                                    subscriptionName,
-                                    subscriptionId: opId,
-                                    variableValues: params.variables,
-                                    operationName: params.operationName
-                                }
+                            const setSubscriptionParams: Subscription = {
+                                clientId,
+                                query: params.query,
+                                subscriptionName,
+                                subscriptionId: opId,
+                                variableValues: params.variables
                             }
-                            return this.db.put(putParams).promise().then(res => {
-                                console.log('put res');
-                                console.log(res);
-                            });
+                            return this.addSubscriptionFunction(setSubscriptionParams);
                         })
                 } else {
                     return this.execute(
@@ -177,7 +189,7 @@ export class SubscriptionServer {
                             return this.sendMessage(clientId, opId, MessageTypes.GQL_DATA, result);
                         })
                         .then(_ => {
-                            this.sendMessage(clientId, opId, MessageTypes.GQL_COMPLETE, null);
+                            return this.sendMessage(clientId, opId, MessageTypes.GQL_COMPLETE, null);
                         })
                         .catch(err => {
                             if (params.formatError) {
