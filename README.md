@@ -3,9 +3,9 @@
 (Work in progress!)
 An adaptation of the [Apollo Subscriptions Ws Transport](https://github.com/apollographql/subscriptions-transport-ws) to support serverless GraphQL queries, mutations and subscriptions using AWS iot websockets.
 
-## Architecture
-Diagram here
+## Architecture Diagram
 
+![Architecture Diagram](images/server-diagram.png)
 
 ## Functions
 
