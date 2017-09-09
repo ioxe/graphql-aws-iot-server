@@ -8,10 +8,11 @@
     "prebuild": "rm -rf dist && mkdir -p dist",
     "build": "tsc",
     "test": "jest",
-    "test:publisher": "jest tests/publisher.test.ts --watch",    
-    "test:manager": "jest tests/publisher.test.ts --watch",    
+    "test:publisher": "jest tests/publisher.test.ts --watch",
+    "test:manager": "jest tests/publisher.test.ts --watch",
     "test:coverage": "jest --coverage",
-    "test:dev": "jest --watch"
+    "test:dev": "jest --watch",
+    "gen:docs": "typedoc  --out documentation"
   },
   "license": "MIT",
   "devDependencies": {
@@ -21,6 +22,7 @@
     "aws-sdk": "^2.107.0",
     "graphql": "0.11.2",
     "jest": "^21.0.1",
+    "typedoc": "^0.8.0",
     "typescript": "^2.4.2"
   },
   "peerDependencies": {

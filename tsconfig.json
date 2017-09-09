@@ -1,7 +1,6 @@
 {
     "compileOnSave": false,
     "compilerOptions": {
-      "sourceRoot": "src",
       "outDir": "./dist",
       "sourceMap": true,
       "declaration": true,
@@ -20,7 +19,10 @@
       ]
     },
     "exclude": [
-      "tests/**/*"
+      "tests/**/*",
+      "documentation/**/*",
+      "node_modules/**/*",
+      "coverage/**/*"
     ]
   }
   
