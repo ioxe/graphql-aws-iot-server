@@ -50,13 +50,17 @@ The database choice and how you choose to batch has been purposely left to the a
 ### Best Practices
 
 * We recommend using the AWS IoT disconnect lifecycle event to remove active subscriptions from a clientId. 
-See https://github.com/ioxe/graphql-aws-iot-example for an example of a pruner on the aws iot disconnect event as well as a full working demo.
+See [Demo Code](https://github.com/ioxe/graphql-aws-iot-example)for an example of a pruner on the aws iot disconnect event as well as a full working demo.
 
 * For scale you can publish aws iot events to a kinesis stream which then invokes your SubscriptionManager lambda function
 
+# See full example app at
 
+Source Code
+[Demo Code](https://github.com/ioxe/graphql-aws-iot-example)
 
-
+Demo URL
+[Demo URL](https://todo.girishnanda.com)
 
 
 
