@@ -49,7 +49,7 @@ export type ExecuteFunction = (schema: GraphQLSchema,
     variableValues?: { [key: string]: any },
     operationName?: string) => Promise<ExecutionResult>;
 
-export interface ManagerOptions {
+export interface SubscriptionManagerOptions {
     appPrefix: string; // app namespace for aws iot
     // Saves subscription information to desired db. Should return promise. - used in the case of a new subscription being registered
     addSubscriptionFunction: AddSubscriptionFunction;
@@ -89,7 +89,7 @@ export class SubscriptionManager {
     private addSubscriptionFunction: AddSubscriptionFunction;
     private removeSubscriptionFunction: RemoveSubscriptionFunction;
 
-    constructor(options: ManagerOptions) {
+    constructor(options: SubscriptionManagerOptions) {
         const {
             keepAlive,
           } = options;
