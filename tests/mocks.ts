@@ -7,8 +7,8 @@ export const createIotDataMock = (parentObj) => {
                 promise: () => {
                     self.messages.push(params);
                     return Promise.resolve(params);
-                }
-            }
-        }
-    }
-}
+                },
+            };
+        },
+    };
+};

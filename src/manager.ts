@@ -209,8 +209,6 @@ export class SubscriptionManager {
                         });
                 }
             case MessageTypes.GQL_STOP:
-                console.log('stop payload');
-                console.log(parsedMessage);
                 return this.unsubscribe(clientId, parsedMessage.payload.subscriptionName);
             default:
                 return this.sendError(clientId, opId, { message: 'Invalid message type!' });

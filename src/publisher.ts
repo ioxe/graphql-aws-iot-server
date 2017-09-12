@@ -10,13 +10,13 @@ export interface SubscriptionPublisherOptions {
 }
 
 export class SubscriptionPublisher {
-    appPrefix: string;
-    iotData: AWS.IotData;
-    schema: GraphQLSchema;
+    private appPrefix: string;
+    private iotData: AWS.IotData;
+    private schema: GraphQLSchema;
 
     constructor(options: SubscriptionPublisherOptions) {
         if (!options.iotEndpoint) {
-            throw new Error('Iot Endpoint Required')
+            throw new Error('Iot Endpoint Required');
         }
 
         if (!options.schema) {
@@ -56,12 +56,13 @@ export class SubscriptionPublisher {
                             let sendMessagePromises = [];
                             group.forEach(subscription => {
                                 const { clientId, subscriptionId } = subscription;
-                                sendMessagePromises.push(this.sendMessage(clientId, subscriptionId, MessageTypes.GQL_DATA, executionResult));
+                                sendMessagePromises.push(
+                                    this.sendMessage(clientId, subscriptionId, MessageTypes.GQL_DATA, executionResult));
                             });
                             return Promise.all(sendMessagePromises);
-                        })
-                )
-            })
+                        }),
+                );
+            });
             return Promise.all(promises);
         } else {
             // execute only one query
@@ -88,7 +89,7 @@ export class SubscriptionPublisher {
         const params = {
             topic: this.appPrefix + '/in/' + clientId,
             payload: JSON.stringify(message),
-            qos: 0
+            qos: 0,
         };
 
         return this.iotData.publish(params).promise();
@@ -103,20 +104,20 @@ export class SubscriptionPublisher {
             document,
             payload,
             contextValue,
-            variableValues
+            variableValues,
         );
     }
 
     private groupBy(array, f) {
-        var groups = {};
+        let groups = {};
         array.forEach(function (o) {
-            var group = JSON.stringify(f(o));
+            const group = JSON.stringify(f(o));
             groups[group] = groups[group] || [];
             groups[group].push(o);
         });
         return Object.keys(groups).map(function (group) {
             return groups[group];
-        })
+        });
     }
 
 }

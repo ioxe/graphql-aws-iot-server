@@ -1,11 +1,11 @@
 
-import { 
-    GraphQLSchema, 
+import {
+    GraphQLSchema,
     GraphQLString,
     GraphQLID,
     GraphQLList,
-    GraphQLObjectType, 
-    GraphQLNonNull 
+    GraphQLObjectType,
+    GraphQLNonNull
 } from 'graphql';
 
 const Todo = new GraphQLObjectType({
@@ -14,7 +14,7 @@ const Todo = new GraphQLObjectType({
     fields: () => ({
         id: {
             type: new GraphQLNonNull(GraphQLID),
-            description: 'Db uuid'
+            description: 'Db uuid',
         },
         name: {
             type: new GraphQLNonNull(GraphQLString),
@@ -35,7 +35,7 @@ export const schema = new GraphQLSchema({
                 type: new GraphQLList(Todo),
                 description: 'Get Todos',
                 resolve: () => {
-                   return [
+                    return [
                         {
                             id: '1',
                             name: 'Todo 1',
@@ -45,11 +45,11 @@ export const schema = new GraphQLSchema({
                             id: '2',
                             name: 'Todo 2',
                             content: 'Todo 2 Content'
-                        }
+                        },
                     ];
-                }
-            }
-        }
+                },
+            },
+        },
     }),
     subscription: new GraphQLObjectType({
         name: 'Subscription',
@@ -57,9 +57,9 @@ export const schema = new GraphQLSchema({
             todoAdded: {
                 type: Todo,
                 description: 'New todo added',
-                subscribe: () => {}
-            }
-        }
-    })
-})
+                subscribe: () => { }
+            },
+        },
+    }),
+});
 
