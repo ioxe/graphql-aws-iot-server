@@ -5,7 +5,7 @@ import {
     GraphQLID,
     GraphQLList,
     GraphQLObjectType,
-    GraphQLNonNull
+    GraphQLNonNull,
 } from 'graphql';
 
 const Todo = new GraphQLObjectType({
@@ -18,13 +18,13 @@ const Todo = new GraphQLObjectType({
         },
         name: {
             type: new GraphQLNonNull(GraphQLString),
-            description: 'Unique friendly name for todo item'
+            description: 'Unique friendly name for todo item',
         },
         content: {
             type: new GraphQLNonNull(GraphQLString),
-            description: 'Content of todo item'
-        }
-    })
+            description: 'Content of todo item',
+        },
+    }),
 });
 
 export const schema = new GraphQLSchema({
@@ -39,12 +39,12 @@ export const schema = new GraphQLSchema({
                         {
                             id: '1',
                             name: 'Todo 1',
-                            content: 'Todo 1 Content'
+                            content: 'Todo 1 Content',
                         },
                         {
                             id: '2',
                             name: 'Todo 2',
-                            content: 'Todo 2 Content'
+                            content: 'Todo 2 Content',
                         },
                     ];
                 },
@@ -57,7 +57,7 @@ export const schema = new GraphQLSchema({
             todoAdded: {
                 type: Todo,
                 description: 'New todo added',
-                subscribe: () => { }
+                subscribe: () => { },
             },
         },
     }),
