@@ -22,7 +22,8 @@
       "tests/**/*",
       "documentation/**/*",
       "node_modules/**/*",
-      "coverage/**/*"
+      "coverage/**/*",
+      "dist/**/*"
     ]
   }
   

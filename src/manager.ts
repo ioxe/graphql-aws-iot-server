@@ -102,7 +102,7 @@ export class SubscriptionManager {
         }
 
         if (!options.appPrefix) {
-            throw new Error('AppPrefix required');
+            throw new Error('App Prefix required');
         }
 
         if (!options.addSubscriptionFunction) {

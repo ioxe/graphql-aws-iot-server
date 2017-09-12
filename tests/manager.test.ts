@@ -61,7 +61,7 @@ describe('Initialization', () => {
         } catch (e) {
             error = e;
         }
-        expect(error.message).toEqual('AppPrefix required');
+        expect(error.message).toEqual('App Prefix required');
     })
 
     it('throws an error if add subscription function is missing', () => {
