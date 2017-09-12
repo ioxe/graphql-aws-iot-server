@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var AWS = require("aws-sdk");
-var PubSub = /** @class */ (function () {
+var PubSub = (function () {
     function PubSub(functionName) {
         this.lambda = new AWS.Lambda();
         this.functionName = functionName;
@@ -10,11 +10,10 @@ var PubSub = /** @class */ (function () {
         var params = {
             FunctionName: this.functionName,
             InvocationType: 'Event',
-            Payload: JSON.stringify({ triggerName: triggerName, payload: payload })
+            Payload: JSON.stringify({ triggerName: triggerName, payload: payload }),
         };
         return this.lambda.invoke(params).promise();
     };
-    ;
     return PubSub;
 }());
 exports.PubSub = PubSub;

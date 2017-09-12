@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var MessageTypes = /** @class */ (function () {
+var MessageTypes = (function () {
     function MessageTypes() {
         throw new Error('Static Class');
     }

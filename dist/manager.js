@@ -6,7 +6,7 @@ var graphql_1 = require("graphql");
 var execution = require('graphql/execution/execute');
 var addPath = execution.addPath, assertValidExecutionArguments = execution.assertValidExecutionArguments, buildExecutionContext = execution.buildExecutionContext, buildResolveInfo = execution.buildResolveInfo, getOperationRootType = execution.getOperationRootType, collectFields = execution.collectFields, getFieldDef = execution.getFieldDef, resolveFieldValueOrError = execution.resolveFieldValueOrError;
 var is_subscriptions_1 = require("./utils/is-subscriptions");
-var SubscriptionManager = /** @class */ (function () {
+var SubscriptionManager = (function () {
     function SubscriptionManager(options) {
         var keepAlive = options.keepAlive;
         if (!options.iotEndpoint) {
@@ -16,7 +16,7 @@ var SubscriptionManager = /** @class */ (function () {
             throw new Error('Schema Required');
         }
         if (!options.appPrefix) {
-            throw new Error('AppPrefix required');
+            throw new Error('App Prefix required');
         }
         if (!options.addSubscriptionFunction) {
             throw new Error('Add Subscription Function Required');
@@ -32,7 +32,7 @@ var SubscriptionManager = /** @class */ (function () {
         this.addSubscriptionFunction = options.addSubscriptionFunction;
         this.removeSubscriptionFunction = options.removeSubscriptionFunction;
     }
-    // unsubscribe using clientId and subscriptionName rather than opId to avoid creating an extra index. 
+    // unsubscribe using clientId and subscriptionName rather than opId to avoid creating an extra index.
     SubscriptionManager.prototype.unsubscribe = function (clientId, subscriptionName) {
         return this.removeSubscriptionFunction({ clientId: clientId, subscriptionName: subscriptionName });
     };
@@ -68,7 +68,7 @@ var SubscriptionManager = /** @class */ (function () {
                             query: params_1.query,
                             subscriptionName: subscriptionName,
                             subscriptionId: opId,
-                            variableValues: params_1.variables
+                            variableValues: params_1.variables,
                         };
                         return _this.addSubscriptionFunction(addSubscriptionParams);
                     });
@@ -104,8 +104,6 @@ var SubscriptionManager = /** @class */ (function () {
                     });
                 }
             case message_types_1.default.GQL_STOP:
-                console.log('stop payload');
-                console.log(parsedMessage);
                 return this.unsubscribe(clientId, parsedMessage.payload.subscriptionName);
             default:
                 return this.sendError(clientId, opId, { message: 'Invalid message type!' });
@@ -140,7 +138,7 @@ var SubscriptionManager = /** @class */ (function () {
         var params = {
             topic: this.appPrefix + '/in/' + clientId,
             payload: JSON.stringify(message),
-            qos: 0
+            qos: 0,
         };
         if (message && clientId) {
             return this.iotData.publish(params).promise();

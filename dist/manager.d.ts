@@ -14,7 +14,7 @@ export interface OperationMessage {
 export declare type ExecuteFunction = (schema: GraphQLSchema, document: DocumentNode, rootValue?: any, contextValue?: any, variableValues?: {
     [key: string]: any;
 }, operationName?: string) => Promise<ExecutionResult>;
-export interface ManagerOptions {
+export interface SubscriptionManagerOptions {
     appPrefix: string;
     addSubscriptionFunction: AddSubscriptionFunction;
     removeSubscriptionFunction: RemoveSubscriptionFunction;
@@ -47,8 +47,8 @@ export declare class SubscriptionManager {
     private iotData;
     private addSubscriptionFunction;
     private removeSubscriptionFunction;
-    constructor(options: ManagerOptions);
-    private unsubscribe(clientId, subscriptionName);
+    constructor(options: SubscriptionManagerOptions);
+    unsubscribe(clientId: string, subscriptionName: string): Promise<void>;
     onMessage(parsedMessage: OperationMessage, clientId: string, context: any): Promise<any>;
     private validateSubscription(schema, document, rootValue, contextValue, variableValues, operationName, fieldResolver?);
     private invariant(condition, message);

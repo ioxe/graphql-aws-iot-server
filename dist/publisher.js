@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var AWS = require("aws-sdk");
 var graphql_1 = require("graphql");
 var message_types_1 = require("./message-types");
-var SubscriptionPublisher = /** @class */ (function () {
+var SubscriptionPublisher = (function () {
     function SubscriptionPublisher(options) {
         var _this = this;
         // For each payload yielded from a subscription, map it over the normal
@@ -70,7 +70,7 @@ var SubscriptionPublisher = /** @class */ (function () {
         var params = {
             topic: this.appPrefix + '/in/' + clientId,
             payload: JSON.stringify(message),
-            qos: 0
+            qos: 0,
         };
         return this.iotData.publish(params).promise();
     };

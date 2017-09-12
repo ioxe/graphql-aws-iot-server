@@ -13,7 +13,7 @@
     "lint": "tslint src/**/*",    
     "prebuild": "rimraf dist && mkdir -p dist",    
     "build": "tsc",
-    "prepublish": "npm run lint && npm run test && npm run build",
+    "prepublishOnly": "npm run lint && npm run test && npm run build",
     "gen:docs": "typedoc  --out documentation"
   },
   "license": "MIT",

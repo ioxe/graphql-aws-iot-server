@@ -1,4 +1,3 @@
-import * as AWS from 'aws-sdk';
 import { GraphQLSchema } from 'graphql';
 import { Subscription } from '../src/manager';
 export interface SubscriptionPublisherOptions {
@@ -7,9 +6,9 @@ export interface SubscriptionPublisherOptions {
     schema: GraphQLSchema;
 }
 export declare class SubscriptionPublisher {
-    appPrefix: string;
-    iotData: AWS.IotData;
-    schema: GraphQLSchema;
+    private appPrefix;
+    private iotData;
+    private schema;
     constructor(options: SubscriptionPublisherOptions);
     executeQueriesAndSendMessages: (subscriptions: Subscription | Subscription[], payload: any) => Promise<any>;
     private groupByIdenticalExecutions(subscriptions);
