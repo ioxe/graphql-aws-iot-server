@@ -10,7 +10,7 @@ An adaptation of the [Apollo Subscriptions Ws Transport](https://github.com/apol
 ## Functions
 
 ### SubscriptionManager
- * The manager publishes all socket to ${AppPrefix}/in/clientId where clientId is the unique identifier per client connected on AWS IoT
+ * The manager publishes all socket to ${appPrefix}/in/clientId where clientId is the unique identifier per client connected on AWS IoT
  * For queries / mutations the manager immediately published the result upon processing the query.
  * For subscriptions the following process occurs:
   1. Validate subscription with GraphQLSchema
