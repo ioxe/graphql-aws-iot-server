@@ -23,7 +23,7 @@ const {
     getOperationRootType,
     collectFields,
     getFieldDef,
-    resolveFieldValueOrError
+    resolveFieldValueOrError,
  } = execution;
 
 import { isASubscriptionOperation } from './utils/is-subscriptions';
@@ -51,12 +51,13 @@ export type ExecuteFunction = (schema: GraphQLSchema,
 
 export interface ManagerOptions {
     appPrefix: string; // app namespace for aws iot
-    addSubscriptionFunction: AddSubscriptionFunction // Saves subscription information to desired db. Should return promise. - used in the case of a new subscription being registered
-    removeSubscriptionFunction: RemoveSubscriptionFunction // Gets subscription infomration - used in the case of unsubscribe
+    // Saves subscription information to desired db. Should return promise. - used in the case of a new subscription being registered
+    addSubscriptionFunction: AddSubscriptionFunction;
+    removeSubscriptionFunction: RemoveSubscriptionFunction; // Gets subscription infomration - used in the case of unsubscribe
     // rootValue?: any;
     schema: any;
     iotEndpoint: string; // iot endpoint for region (i.e. aws iot describe-endpoint --region us-west-2)
-    keepAlive?: number; // TODO implications of package with keep alive param    
+    keepAlive?: number; // TODO implications of package with keep alive param
 }
 
 export interface Subscription {
@@ -68,17 +69,17 @@ export interface Subscription {
 }
 
 
-export type AddSubscriptionFunction = (params: Subscription) => Promise<any>
+export type AddSubscriptionFunction = (params: Subscription) => Promise<any>;
 
 export interface RemoveSubscriptionParams {
     clientId: string;
-    subscriptionName: string,
+    subscriptionName: string;
 }
 
-export type RemoveSubscriptionFunction = (params: RemoveSubscriptionParams) => Promise<void>
+export type RemoveSubscriptionFunction = (params: RemoveSubscriptionParams) => Promise<void>;
 
 export class SubscriptionManager {
-    private appPrefix; // namespace for app topics    
+    private appPrefix; // namespace for app topics
     private execute: ExecuteFunction;
     private schema: GraphQLSchema;
     private rootValue: any;
@@ -94,7 +95,7 @@ export class SubscriptionManager {
           } = options;
 
         if (!options.iotEndpoint) {
-            throw new Error('Iot Endpoint Required')
+            throw new Error('Iot Endpoint Required');
         }
 
         if (!options.schema) {
@@ -106,7 +107,7 @@ export class SubscriptionManager {
         }
 
         if (!options.addSubscriptionFunction) {
-            throw new Error('Add Subscription Function Required')
+            throw new Error('Add Subscription Function Required');
         }
 
         if (!options.removeSubscriptionFunction) {
@@ -121,8 +122,8 @@ export class SubscriptionManager {
         this.removeSubscriptionFunction = options.removeSubscriptionFunction;
     }
 
-    // unsubscribe using clientId and subscriptionName rather than opId to avoid creating an extra index. 
-    private unsubscribe(clientId: string, subscriptionName: string) {
+    // unsubscribe using clientId and subscriptionName rather than opId to avoid creating an extra index.
+    public unsubscribe(clientId: string, subscriptionName: string) {
         return this.removeSubscriptionFunction({ clientId, subscriptionName });
     }
 
@@ -168,10 +169,10 @@ export class SubscriptionManager {
                                 query: params.query,
                                 subscriptionName,
                                 subscriptionId: opId,
-                                variableValues: params.variables
-                            }
+                                variableValues: params.variables,
+                            };
                             return this.addSubscriptionFunction(addSubscriptionParams);
-                        })
+                        });
                 } else {
                     return this.execute(
                         this.schema,
@@ -205,7 +206,7 @@ export class SubscriptionManager {
                                 }
                                 return this.sendError(clientId, opId, error);
                             }
-                        })
+                        });
                 }
             case MessageTypes.GQL_STOP:
                 console.log('stop payload');
@@ -227,7 +228,7 @@ export class SubscriptionManager {
         let assert = assertValidExecutionArguments(
             schema,
             document,
-            variableValues
+            variableValues,
         );
         const exeContext = buildExecutionContext(
             schema,
@@ -236,7 +237,7 @@ export class SubscriptionManager {
             contextValue,
             variableValues,
             operationName,
-            fieldResolver
+            fieldResolver,
         );
         const type = getOperationRootType(schema, exeContext.operation);
         const fields = collectFields(
@@ -244,7 +245,7 @@ export class SubscriptionManager {
             type,
             exeContext.operation.selectionSet,
             Object.create(null),
-            Object.create(null)
+            Object.create(null),
         );
         const responseNames = Object.keys(fields);
         const responseName = responseNames[0];
@@ -253,7 +254,7 @@ export class SubscriptionManager {
         const fieldDef = getFieldDef(schema, type, fieldNode.name.value);
         this.invariant(
             fieldDef,
-            'This subscription is not defined by the schema.'
+            'This subscription is not defined by the schema.',
         );
         return Promise.resolve(fieldNode.name.value);
     }
@@ -276,7 +277,7 @@ export class SubscriptionManager {
         const params = {
             topic: this.appPrefix + '/in/' + clientId,
             payload: JSON.stringify(message),
-            qos: 0
+            qos: 0,
         };
 
         if (message && clientId) {
