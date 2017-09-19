@@ -5,17 +5,27 @@
   "author": "Girish Nanda <girish@ioxengineering.com>",
   "main": "dist/index.js",
   "scripts": {
-    "test": "jest",    
+    "test": "jest",
     "test:coverage": "jest --coverage",
     "test:dev": "jest --watch",
-    "test:manager": "jest tests/manager.test.ts --watch",    
+    "test:manager": "jest tests/manager.test.ts --watch",
     "test:publisher": "jest tests/publisher.test.ts --watch",
-    "lint": "tslint src/**/*",    
-    "prebuild": "rimraf dist && mkdir -p dist",    
+    "lint": "tslint src/**/*",
+    "prebuild": "rimraf dist && mkdir -p dist",
     "build": "tsc",
     "prepublishOnly": "npm run lint && npm run test && npm run build",
     "gen:docs": "typedoc  --out documentation"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ioxe/graphql-aws-iot-server.git"
+  },
+  "author": "Girish Nanda <girish@ioxengineering.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ioxe/graphql-aws-iot-server/issues"
+  },
+  "homepage": "https://github.com/ioxe/graphql-aws-iot-server#readme",
   "license": "MIT",
   "devDependencies": {
     "@types/graphql": "^0.10.2",
