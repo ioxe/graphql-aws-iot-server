@@ -1,7 +1,7 @@
 # graphql-aws-iot-server (serverless and lambda friendly!)
 
 (Work in progress!)
-Adapted from the [Apollo Subscriptions Ws Transport](https://github.com/apollographql/subscriptions-transport-ws) to support serverless GraphQL queries, mutations and subscriptions using AWS iot websockets.
+Adapted from the [Apollo subscriptions-transport-ws](https://github.com/apollographql/subscriptions-transport-ws) to support serverless GraphQL queries, mutations and subscriptions using AWS IoT websockets, lambda functions and an interface to your db  of choice.
 
 ## Architecture Diagram
 
@@ -10,11 +10,11 @@ Adapted from the [Apollo Subscriptions Ws Transport](https://github.com/apollogr
 ## Functions
 
 ### SubscriptionManager
- * The manager publishes all socket to ${appPrefix}/in/clientId where clientId is the unique identifier per client connected on AWS IoT
- * For queries / mutations the manager immediately published the result upon processing the query.
+The manager publishes all socket messages to `${appPrefix}/in/clientId`, where `clientId` is the unique identifier per client connected on AWS IoT
+ * For queries / mutations the manager immediately publishes the result upon processing the query.
  * For subscriptions the following process occurs:
   1. Validate subscription with GraphQLSchema
-  2. Store subscriptions information in DB. 
+  2. Store subscription information in DB. 
   You provide the function to store a new subscription to the db. The addSubscription must return a promise on completion. The  input parameter to this function is of the following format:
   ``` ts
  interface Subscription {
@@ -25,7 +25,7 @@ Adapted from the [Apollo Subscriptions Ws Transport](https://github.com/apollogr
     variableValues: { [key: string]: any };
 }
 ```
-3. The GraphQlServer Package exports a PubSub class which is used to publish a new message. The PubSub class has a publish method which invokes the SubscriptionPublisherFunction. In your GraphQL Schema you invoke the publish method in the same way as you would if you were using the servered subscriptions transport. The method returns a promise to ensure completion.
+3. The GraphQLServer Package exports a PubSub class which is used to publish a new message. The PubSub class has a publish method which invokes the SubscriptionPublisherFunction. In your GraphQL Schema you invoke the publish method in the same way as you would if you were using the 'servered' subscriptions transport. The method returns a promise to ensure completion.
 ```js
 return pubsub.publish('NEW_TODO', { teamTodoAdded: input }).then(_ => {...});
 ```
@@ -34,15 +34,15 @@ return pubsub.publish('NEW_TODO', { teamTodoAdded: input }).then(_ => {...});
 
 ### SubscriptionPublisher
 
-The publisher has one public method executeQueriesAndSendMessages which takes an array of subscriptions in the same format as they were stored and executes the queries and then publishes the result to the active subscribers. This method returns a promise to ensure completion. 
+The publisher has one public method, `executeQueriesAndSendMessages`, which takes an array of subscriptions in the same format as they were stored, executes the queries and then publishes the result to the active subscribers. This method returns a promise to ensure completion. 
 
-The triggerNameToSubscriptionNamesMap and the triggerNameToFilterFunctionsMap is defined in your own lambda function before invoking the publisher.
+The `triggerNameToSubscriptionNamesMap` and the `triggerNameToFilterFunctionsMap` are defined in your own lambda function before invoking the publisher.
 
 1. Your application Subscription Publisher will get triggerName and payload in the event object.
-2. Use the triggerNameToSubscriptionNamesMap to identify all the subscriptionNames that you need to retrieve subscription rows for. 
-3. Retrieve subscriptions from the db. Ideally for each subscription pass in the array of subscription rows to the executeQueriesAndSendMessages. 
+2. Use the `triggerNameToSubscriptionNamesMap` to identify all the subscriptionNames that you need to retrieve subscription rows for. 
+3. Retrieve subscriptions from the db. For each subscription pass in the array of subscription rows to the `executeQueriesAndSendMessages`. 
 4. Execute the filterFunction for the triggerName on each row.
-5. For those rows that return true in the filter function, you can run the executeQueriesAndSendMessages with an array of subscriptions and payload as the parameters.
+5. For those rows that return true in the filter function, you can run the `executeQueriesAndSendMessages` with an array of subscriptions and payload as the parameters.
 6. You can choose to run this function in batches as per your application logic. 
 
 The database choice and how you choose to batch has been purposely left to the application rather than this helper package for reusability.
@@ -50,9 +50,9 @@ The database choice and how you choose to batch has been purposely left to the a
 ### Best Practices
 
 * We recommend using the AWS IoT disconnect lifecycle event to remove active subscriptions from a clientId. 
-See [Demo Code](https://github.com/ioxe/graphql-aws-iot-example)for an example of a pruner on the aws iot disconnect event as well as a full working demo.
+See [Demo Code](https://github.com/ioxe/graphql-aws-iot-example) for an example of a pruner on the aws iot disconnect event as well as a full working demo.
 
-* For scale you can publish aws iot events to a kinesis stream which then invokes your SubscriptionManager lambda function
+* For scale you can publish AWS IoT events to a Kinesis stream which then invokes your SubscriptionManager lambda function
 
 # See full example app at
 
