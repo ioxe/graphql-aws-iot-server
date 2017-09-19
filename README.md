@@ -54,13 +54,11 @@ See [Demo Code](https://github.com/ioxe/graphql-aws-iot-example) for an example 
 
 * For scale you can publish AWS IoT events to a Kinesis stream which then invokes your SubscriptionManager lambda function
 
-# See full example app at
+# Example App
 
-Source Code
-[Demo Code](https://github.com/ioxe/graphql-aws-iot-example)
-
-Demo URL
 [Demo URL](https://todo.girishnanda.com)
+
+[Source Code](https://github.com/ioxe/graphql-aws-iot-example)
 
 
 
