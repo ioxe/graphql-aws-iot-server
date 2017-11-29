@@ -1,3 +1,7 @@
+# AWS AppSync 
+
+AWS recently launched [AppSync](https://aws.amazon.com/blogs/aws/introducing-amazon-appsync/) which is in public preview. I have yet to try it my self but it is significantly easier to setup than this package for graphql subscriptions. It also has cool features such as offline support and autoprovisioning of dynamodb tables based on your graphql schema.
+
 # graphql-aws-iot-server (serverless and lambda friendly!)
 
 (Work in progress!)
